@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Core"><title>Spark 学习（1）：久闻大名 · Eisuto</title><meta name="description" content="简介Spark 于 2009 年诞生于加州大学伯克利分校 AMPLab，2013 年被捐赠给 Apache 软件基金会，2014 年 2 月成为 Apache 的顶级项目。相对于 MapReduce 的批处理计算，Spark 可以带来上百倍的性能提升，因此它成为继 MapReduce 之后，最为广泛"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo.png" style="width:127px;"><h3 title=""><a href="/">Eisuto</a></h3><div class="description"><p>時雨終盡，愛文於葉。</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/eisuto"><i class="fa fa-github"></i></a></li><li><a href="mailto:eisuto@qq.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><!--.p--><!--  span © #{theme.copyright}--><!--  i.fa.fa-star--><!--  span  #{theme.author}--><div class="by_farbox"><span>Powered by</span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo</a><span> &</span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core</a></div><!--.beian--><!--  a(href="http://www.beian.miit.gov.cn/", target="_blank") #{theme.beian}--><!--  span(style="height:10px;margin-left: 10px;") |--><!--  img(src = url_for('images/gongan.png'), style="height:10px;margin-left: 10px;position: relative;top: 1px;")--><!--  span(style="margin-left: 2px;") #{theme.gongan}--></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/tags">标签</a></li><li><a href="/about">关于</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spark 学习（1）：久闻大名</a></h3></div><div class="post-content"><h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>Spark 于 2009 年诞生于加州大学伯克利分校 AMPLab，2013 年被捐赠给 Apache 软件基金会，2014 年 2 月成为 Apache 的顶级项目。相对于 MapReduce 的批处理计算，Spark 可以带来上百倍的性能提升，因此它成为继 MapReduce 之后，最为广泛使用的分布式计算框架。<br>​</p>
+<h1 id="Spark-为什么会出现"><a href="#Spark-为什么会出现" class="headerlink" title="Spark 为什么会出现"></a>Spark 为什么会出现</h1><ol>
+<li>为了解决数据量大导致的集群维度上的问题（并行化，容错，资源的动态分配）</li>
+<li>为了解决数据流模型在<strong>计算过程中不能高效的共享数据</strong>的问题。MapReduce 计算模型中 Map 的结果必须落盘，然后 Reduce 再读取并加载到内存众的问题，Spark RDD 能够将数据 cache 到内存中，省去了从磁盘加载的过程，同时 Spark shuffle 过程中的数据也是直接放在内存中的，所以 **Spark RDD **在并行计算阶段之间能够高效的共享数据。</li>
+<li>为了解决数据容错的问题。一般容错有两种方式: 1.在主机之间复制数据（恢复时间短，但使用内存和磁盘多）2.对各主机的更新情况做日志记录（不需要额外内存，消耗时间长）但这两种方式对于数据密集型的任务来说代价很高。所以** RDD 提供一种基于粗粒度变换的接口**，该接口会将相同的操作应用到多个数据集上。这使得他们可以通过记录用来创建数据集的变换（lineage），而不需存储真正的数据，进而达到高效的容错性。</li>
+<li>RDD 管理。 Spark提供了三种三种对持久化RDD的存储策略。未序列化Java对象存于内存中、序列化后的数据存于内存、磁盘中。</li>
+<li>宽窄依赖</li>
+</ol>
+<h2 id="与-Hadoop-的比较"><a href="#与-Hadoop-的比较" class="headerlink" title="与 Hadoop 的比较"></a>与 Hadoop 的比较</h2><table>
+<thead>
+<tr>
+<th>Hadoop</th>
+<th>Spark</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>类型</td>
+<td>分布式基础平台, 包含计算, 存储, 调度</td>
+</tr>
+<tr>
+<td>场景</td>
+<td>大规模数据集上的批处理</td>
+</tr>
+<tr>
+<td>价格</td>
+<td>对机器要求低, 便宜</td>
+</tr>
+<tr>
+<td>编程范式</td>
+<td>Map+Reduce, API 较为底层, 算法适应性差</td>
+</tr>
+<tr>
+<td>数据存储结构</td>
+<td>MapReduce 中间计算结果存在 HDFS 磁盘上, 延迟大</td>
+</tr>
+<tr>
+<td>运行方式</td>
+<td>Task 以进程方式维护, 任务启动慢</td>
+</tr>
+</tbody></table>
+<h1 id="组件"><a href="#组件" class="headerlink" title="组件"></a>组件</h1><p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyorgrnnfmj30gf06pmyi.jpg" alt="640.webp"> </p>
+<p><strong>Spark Core</strong>：实现了 Spark 的基本功能，包含 RDD、任务调度、内存管理、错误恢复、与存储系统交互等模块。<br><strong>Spark SQL</strong>：Spark 用来操作结构化数据的程序包。通过 Spark SQL，我们可以使用 SQL 操作数据。<br><strong>Spark Streaming</strong>：Spark 提供的对实时数据进行流式计算的组件。提供了用来操作数据流的 API。<br><strong>Spark MLlib</strong>：提供常见的机器学习(ML)功能的程序库。包括分类、回归、聚类、协同过滤等，还提供了模型评估、数据导入等额外的支持功能。<br>**GraphX(图计算)**：Spark 中用于图计算的 API，性能良好，拥有丰富的功能和运算符，能在海量数据上自如地运行复杂的图算法。<br><strong>集群管理器</strong>：Spark 设计为可以高效地在一个计算节点到数千个计算节点之间伸缩计算。<br><strong>Structured Streaming</strong>：处理结构化流,统一了离线和实时的 API。  </p>
+<h1 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h1><p>Apache Spark 具有以下特点：</p>
+<ul>
+<li>使用先进的 DAG 调度程序，查询优化器和物理执行引擎，以实现性能上的保证；</li>
+<li>多语言支持，目前支持的有 Java，Scala，Python 和 R；</li>
+<li>提供了 80 多个高级 API，可以轻松地构建应用程序；</li>
+<li>支持批处理，流处理和复杂的业务分析；</li>
+<li>丰富的类库支持：包括 SQL，MLlib，GraphX 和 Spark Streaming 等库，并且可以将它们无缝地进行组合；</li>
+<li>丰富的部署模式：支持本地模式和自带的集群模式，也支持在 Hadoop，Mesos，Kubernetes 上运行；</li>
+<li>多数据源支持：支持访问 HDFS，Alluxio，Cassandra，HBase，Hive 以及数百个其他数据源中的数据。</li>
+</ul>
+<h1 id="集群架构"><a href="#集群架构" class="headerlink" title="集群架构"></a>集群架构</h1><p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyorh6izvdj30gk07yab8.jpg" alt="image.png"></p>
+<table>
+<thead>
+<tr>
+<th><strong>Term（术语）</strong></th>
+<th><strong>Meaning（含义）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Application</td>
+<td>Spark 应用程序，由集群上的一个 Driver 节点和多个 Executor 节点组成。</td>
+</tr>
+<tr>
+<td>Driver Program</td>
+<td>主运用程序，该进程运行应用的 main() 方法并且创建 SparkContext</td>
+</tr>
+<tr>
+<td>Cluster Manager</td>
+<td>集群资源管理器（例如，Standlone Manager，Mesos，YARN）</td>
+</tr>
+<tr>
+<td>Worker Node</td>
+<td>执行计算任务的工作节点</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td>位于工作节点上的应用进程，负责执行计算任务并且将输出数据保存到内存或者磁盘中</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>被发送到 Executor 中的工作单元</td>
+</tr>
+</tbody></table>
+<h2 id="执行过程"><a href="#执行过程" class="headerlink" title="执行过程"></a>执行过程</h2><ol>
+<li>用户程序创建 SparkContext 后，它会连接到集群资源管理器，集群资源管理器会为用户程序分配计算资源，并启动 Executor；</li>
+<li>Dirver 将计算程序划分为不同的执行阶段和多个 Task，之后将 Task 发送给 Executor；</li>
+<li>Executor 负责执行 Task，并将执行状态汇报给 Driver，同时也会将当前节点资源的使用情况汇报给集群资源管理器。</li>
+</ol>
+<p>相信大家对 Spark 有了一个基本认识，下期我们将分享 Spark Core 中最重要的部分—— <strong>RDD</strong>（弹性分布式数据集）。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/spark/" title="spark">spark </a><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2022/01/24/spark-learn-1/,Eisuto,Spark 学习（1）：久闻大名,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/01/25/spark-learn-2/" title="Spark 学习（2）：RDD">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/24/spark-install-windows/" title="Spark 在 Windows下的单机环境搭建">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@latest/dist/Valine.min.js"></script><script>var valine = new Valine({
+  el:'#vcomments',
+  notify:false || false, 
+  verify:false|| false, 
+  app_id:'',
+  app_key:'',
+  placeholder:'念念不忘，必有回响...',
+  path: window.location.pathname,
+  serverURLs: '',
+  visitor:true,
+  recordIP:true,
+  avatar:'mp'
+})</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script src="/js/baidu-tongji.js"></script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"left","width":200,"height":500,"hOffset":5,"vOffset":-38},"mobile":{"show":false,"scale":0.2},"react":{"opacityDefault":0.8,"opacityOnHover":0.2},"log":false});</script></body></html>

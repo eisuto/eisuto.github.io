@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Core"><title>Spark 在 Windows下的单机环境搭建 · Eisuto</title><meta name="description" content="安装 Spark
+在 Apache Spark 官网下载预编译的文件（ 推荐版本 3.1.2 ）点此直接下载 ，解压到某个路径下。如：G:\spark
+
+添加环境变量 SPARK_HOME =&amp;gt; G:\spark
+
+添加环境变量 SPARK_LOCAL_HOSTNAME =&amp;gt; local"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo.png" style="width:127px;"><h3 title=""><a href="/">Eisuto</a></h3><div class="description"><p>時雨終盡，愛文於葉。</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/eisuto"><i class="fa fa-github"></i></a></li><li><a href="mailto:eisuto@qq.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><!--.p--><!--  span © #{theme.copyright}--><!--  i.fa.fa-star--><!--  span  #{theme.author}--><div class="by_farbox"><span>Powered by</span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo</a><span> &</span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core</a></div><!--.beian--><!--  a(href="http://www.beian.miit.gov.cn/", target="_blank") #{theme.beian}--><!--  span(style="height:10px;margin-left: 10px;") |--><!--  img(src = url_for('images/gongan.png'), style="height:10px;margin-left: 10px;position: relative;top: 1px;")--><!--  span(style="margin-left: 2px;") #{theme.gongan}--></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/tags">标签</a></li><li><a href="/about">关于</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spark 在 Windows下的单机环境搭建</a></h3></div><div class="post-content"><h1 id="安装-Spark"><a href="#安装-Spark" class="headerlink" title="安装 Spark"></a>安装 Spark</h1><ol>
+<li><p>在 <a target="_blank" rel="noopener" href="http://spark.apache.org/downloads.html">Apache Spark</a> 官网下载预编译的文件（ 推荐版本 3.1.2 ）<a target="_blank" rel="noopener" href="https://dlcdn.apache.org/spark/spark-3.1.2/spark-3.1.2-bin-hadoop3.2.tgz">点此直接下载</a> ，解压到某个路径下。如：<code>G:\spark</code></p>
+</li>
+<li><p>添加环境变量 <code>SPARK_HOME</code> =&gt; <code>G:\spark</code></p>
+</li>
+<li><p>添加环境变量 <code>SPARK_LOCAL_HOSTNAME</code> =&gt; <code>localhost</code></p>
+</li>
+<li><p>在环境变量 <code>Path</code> 中增加值 <code>%SPARK_HOME%\bin</code> 和 <code>%SPARK_HOME%\sbin</code></p>
+</li>
+<li><p>将安装目录下 <code>/conf</code> 中的 <code>log4j.properties.template</code> 拷贝一份，并进行如下修改，保存后并重命名为 <code>log4j.properties</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># log4j.rootCategory=INFO, console</span><br><span class="line">log4j.rootCategory=WARN, console</span><br></pre></td></tr></table></figure></li>
+<li><p>将安装目录下 <code>/conf</code> 中的 <code>spark-env.sh.template</code> 拷贝一份，并添加如下行，保存后重命名为 <code>spark-env.sh</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SPARK_LOCAL_IP = 127.0.0.1</span><br></pre></td></tr></table></figure>
+<h1 id="安装-Hadoop"><a href="#安装-Hadoop" class="headerlink" title="安装 Hadoop"></a>安装 Hadoop</h1></li>
+<li><p>到 <a target="_blank" rel="noopener" href="https://hadoop.apache.org/releases.html">Apache Hadoop</a> 官网下载预编译文件（为了对应上文Spark，选择3.2.2）<a target="_blank" rel="noopener" href="https://dlcdn.apache.org/hadoop/common/hadoop-3.2.2/hadoop-3.2.2.tar.gz">点此直接下载</a> ，并解压到某个路径下。如：<code>G:\hadoop</code></p>
+</li>
+<li><p>添加环境变量 <code>HADOOP_HOME</code>=&gt; <code>G:\hadoop</code></p>
+</li>
+<li><p>在环境变量 <code>Path</code> 中增加值 <code>%HADOOP_HOME\bin</code> 和 <code>%HADOOP_HOME\sbin</code></p>
+</li>
+<li><p>进入安装目录下的 <code>\etc\hadoop</code> 文件夹，修改 <code>hadoop-env.cmd</code> 文件中的 Java 路径为本机 Java 所在路径。如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@rem</span> The java implementation to use.  Required.</span><br><span class="line"><span class="comment">// 如果是安装在 Program Files 文件夹需使用 PROGRA~1 替换</span></span><br><span class="line">set JAVA_HOME=C:\PROGRA~<span class="number">1</span>\Java\jdk1<span class="number">.8</span><span class="number">.0_261</span></span><br></pre></td></tr></table></figure></li>
+<li><p>下载对应版本的 <a target="_blank" rel="noopener" href="https://github.com/cdarlint/winutils">winutils</a> bin文件，并用下载的文件替换 <code>\hadoop-3.2.2\bin</code> 中的对应文件。<a target="_blank" rel="noopener" href="https://downgit.evecalm.com/#/home?url=https://github.com/cdarlint/winutils/tree/master/hadoop-3.2.2/bin">点此直接下载</a></p>
+</li>
+<li><p>在C盘中新建文件夹 C: \tmp\hive，并在hadooop目录下，执行以下操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">winutils.exe chmod -R <span class="number">777</span> C:\tmp\hive</span><br></pre></td></tr></table></figure></li>
+<li><p>在命令行输入 <code>hadoop versio</code> 验证 Hadoop 安装是否成功</p>
+</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyoqppya2ej30pm04a423.jpg" alt="image.png"></p>
+<ol start="8">
+<li>在命令行输入 <code>spark-shell</code> 验证spark启动是否成功，随后在 <code>4040</code> 端口，即可访问Spark UI</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyoqq9iiuej30u90bgn6s.jpg" alt="image.png"><br><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyoqqdwayyj31h60ecwix.jpg" alt="image.png"></p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-24</span><i class="fa fa-tag"></i><a class="tag" href="/tags/spark/" title="spark">spark </a><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2022/01/24/spark-install-windows/,Eisuto,Spark 在 Windows下的单机环境搭建,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/01/24/spark-learn-1/" title="Spark 学习（1）：久闻大名">上一篇</a></li></ul></div><script src="/js/visitors.js"></script><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@latest/dist/Valine.min.js"></script><script>var valine = new Valine({
+  el:'#vcomments',
+  notify:false || false, 
+  verify:false|| false, 
+  app_id:'',
+  app_key:'',
+  placeholder:'念念不忘，必有回响...',
+  path: window.location.pathname,
+  serverURLs: '',
+  visitor:true,
+  recordIP:true,
+  avatar:'mp'
+})</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script src="/js/baidu-tongji.js"></script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"left","width":200,"height":500,"hOffset":5,"vOffset":-38},"mobile":{"show":false,"scale":0.2},"react":{"opacityDefault":0.8,"opacityOnHover":0.2},"log":false});</script></body></html>

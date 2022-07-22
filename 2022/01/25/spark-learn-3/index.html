@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Core"><title>Spark 学习（3）：常用算子 · Eisuto</title><meta name="description" content="Transformation
+
+
+Transformation 算子
+Meaning（含义）
+
+
+
+map(func)
+对原 RDD 中每个元素运用 func 函数，并生成新的 RDD
+
+
+filter(func)
+对原 RDD 中每个元素使用_func_ 函数进行过滤，并生成新的 RDD
+
+
+fl"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo.png" style="width:127px;"><h3 title=""><a href="/">Eisuto</a></h3><div class="description"><p>時雨終盡，愛文於葉。</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/eisuto"><i class="fa fa-github"></i></a></li><li><a href="mailto:eisuto@qq.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><!--.p--><!--  span © #{theme.copyright}--><!--  i.fa.fa-star--><!--  span  #{theme.author}--><div class="by_farbox"><span>Powered by</span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo</a><span> &</span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core</a></div><!--.beian--><!--  a(href="http://www.beian.miit.gov.cn/", target="_blank") #{theme.beian}--><!--  span(style="height:10px;margin-left: 10px;") |--><!--  img(src = url_for('images/gongan.png'), style="height:10px;margin-left: 10px;position: relative;top: 1px;")--><!--  span(style="margin-left: 2px;") #{theme.gongan}--></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/tags">标签</a></li><li><a href="/about">关于</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spark 学习（3）：常用算子</a></h3></div><div class="post-content"><h2 id="Transformation"><a href="#Transformation" class="headerlink" title="Transformation"></a>Transformation</h2><table>
+<thead>
+<tr>
+<th><strong>Transformation 算子</strong></th>
+<th><strong>Meaning（含义）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>map</strong>(<em>func</em>)</td>
+<td>对原 RDD 中每个元素运用 <em>func</em> 函数，并生成新的 RDD</td>
+</tr>
+<tr>
+<td><strong>filter</strong>(<em>func</em>)</td>
+<td>对原 RDD 中每个元素使用_func_ 函数进行过滤，并生成新的 RDD</td>
+</tr>
+<tr>
+<td><strong>flatMap</strong>(<em>func</em>)</td>
+<td>与 map 类似，但是每一个输入的 item 被映射成 0 个或多个输出的 items（ <em>func</em> 返回类型需要为 Seq ）。</td>
+</tr>
+<tr>
+<td><strong>mapPartitions</strong>(<em>func</em>)</td>
+<td>与 map 类似，但函数单独在 RDD 的每个分区上运行， _func_函数的类型为 Iterator<T> =&gt; Iterator<U> ，其中 T 是 RDD 的类型，即 RDD[T]</td>
+</tr>
+<tr>
+<td><strong>mapPartitionsWithIndex</strong>(<em>func</em>)</td>
+<td>与 mapPartitions 类似，但 <em>func</em> 类型为 (Int, Iterator<T>) =&gt; Iterator<U> ，其中第一个参数为分区索引</td>
+</tr>
+<tr>
+<td><strong>sample</strong>(<em>withReplacement</em>, <em>fraction</em>, <em>seed</em>)</td>
+<td>数据采样，有三个可选参数：设置是否放回（withReplacement）、采样的百分比（_fraction_）、随机数生成器的种子（seed）；</td>
+</tr>
+<tr>
+<td><strong>union</strong>(<em>otherDataset</em>)</td>
+<td>合并两个 RDD</td>
+</tr>
+<tr>
+<td><strong>intersection</strong>(<em>otherDataset</em>)</td>
+<td>求两个 RDD 的交集</td>
+</tr>
+<tr>
+<td><strong>distinct</strong>([<em>numTasks</em>]))</td>
+<td>去重</td>
+</tr>
+<tr>
+<td><strong>groupByKey</strong>([<em>numTasks</em>])</td>
+<td>按照 key 值进行分区，即在一个 (K, V) 对的 dataset 上调用时，返回一个 (K, Iterable<V>)</td>
+</tr>
+<tr>
+<td><strong>reduceByKey</strong>(<em>func</em>, [<em>numTasks</em>])</td>
+<td>按照 key 值进行分组，并对分组后的数据执行归约操作。</td>
+</tr>
+<tr>
+<td><strong>aggregateByKey</strong>(<em>zeroValue</em>,<em>numPartitions</em>)(<em>seqOp</em>, <em>combOp</em>, [<em>numTasks</em>])</td>
+<td>当调用（K，V）对的数据集时，返回（K，U）对的数据集，其中使用给定的组合函数和 zeroValue 聚合每个键的值。与 groupByKey 类似，reduce 任务的数量可通过第二个参数进行配置。</td>
+</tr>
+<tr>
+<td><strong>sortByKey</strong>([<em>ascending</em>], [<em>numTasks</em>])</td>
+<td>按照 key 进行排序，其中的 key 需要实现 Ordered 特质，即可比较</td>
+</tr>
+<tr>
+<td><strong>join</strong>(<em>otherDataset</em>, [<em>numTasks</em>])</td>
+<td>在一个 (K, V) 和 (K, W) 类型的 dataset 上调用时，返回一个 (K, (V, W)) pairs 的 dataset，等价于内连接操作。如果想要执行外连接，可以使用 leftOuterJoin, rightOuterJoin 和 fullOuterJoin 等算子。</td>
+</tr>
+<tr>
+<td><strong>cogroup</strong>(<em>otherDataset</em>, [<em>numTasks</em>])</td>
+<td>在一个 (K, V) 对的 dataset 上调用时，返回一个 (K, (Iterable<V>, Iterable<W>)) tuples 的 dataset。</td>
+</tr>
+<tr>
+<td><strong>cartesian</strong>(<em>otherDataset</em>)</td>
+<td>在一个 T 和 U 类型的 dataset 上调用时，返回一个 (T, U) 类型的 dataset（即笛卡尔积）。</td>
+</tr>
+<tr>
+<td><strong>coalesce</strong>(<em>numPartitions</em>)</td>
+<td>将 RDD 中的分区数减少为 numPartitions。</td>
+</tr>
+<tr>
+<td><strong>repartition</strong>(<em>numPartitions</em>)</td>
+<td>随机重新调整 RDD 中的数据以创建更多或更少的分区，并在它们之间进行平衡。</td>
+</tr>
+<tr>
+<td><strong>repartitionAndSortWithinPartitions</strong>(<em>partitioner</em>)</td>
+<td>根据给定的 partitioner（分区器）对 RDD 进行重新分区，并对分区中的数据按照 key 值进行排序。这比调用 repartition 然后再 sorting（排序）效率更高，因为它可以将排序过程推送到 shuffle 操作所在的机器。</td>
+</tr>
+</tbody></table>
+<h2 id="Action"><a href="#Action" class="headerlink" title="Action"></a>Action</h2><table>
+<thead>
+<tr>
+<th><strong>Action（动作）</strong></th>
+<th><strong>Meaning（含义）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>reduce</strong>(<em>func</em>)</td>
+<td>使用函数_func_执行归约操作</td>
+</tr>
+<tr>
+<td><strong>collect</strong>()</td>
+<td>以一个 array 数组的形式返回 dataset 的所有元素，适用于小结果集。</td>
+</tr>
+<tr>
+<td><strong>count</strong>()</td>
+<td>返回 dataset 中元素的个数。</td>
+</tr>
+<tr>
+<td><strong>first</strong>()</td>
+<td>返回 dataset 中的第一个元素，等价于 take(1)。</td>
+</tr>
+<tr>
+<td><strong>take</strong>(<em>n</em>)</td>
+<td>将数据集中的前 <em>n</em> 个元素作为一个 array 数组返回。</td>
+</tr>
+<tr>
+<td><strong>takeSample</strong>(<em>withReplacement</em>, <em>num</em>, [<em>seed</em>])</td>
+<td>对一个 dataset 进行随机抽样</td>
+</tr>
+<tr>
+<td><strong>takeOrdered</strong>(<em>n</em>, <em>[ordering]</em>)</td>
+<td>按自然顺序（natural order）或自定义比较器（custom comparator）排序后返回前 <em>n</em> 个元素。只适用于小结果集，因为所有数据都会被加载到驱动程序的内存中进行排序。</td>
+</tr>
+<tr>
+<td><strong>saveAsTextFile</strong>(<em>path</em>)</td>
+<td>将 dataset 中的元素以文本文件的形式写入本地文件系统、HDFS 或其它 Hadoop 支持的文件系统中。Spark 将对每个元素调用 toString 方法，将元素转换为文本文件中的一行记录。</td>
+</tr>
+<tr>
+<td><strong>saveAsSequenceFile</strong>(<em>path</em>)</td>
+<td>将 dataset 中的元素以 Hadoop SequenceFile 的形式写入到本地文件系统、HDFS 或其它 Hadoop 支持的文件系统中。该操作要求 RDD 中的元素需要实现 Hadoop 的 Writable 接口。对于 Scala 语言而言，它可以将 Spark 中的基本数据类型自动隐式转换为对应 Writable 类型。(目前仅支持 Java and Scala)</td>
+</tr>
+<tr>
+<td><strong>saveAsObjectFile</strong>(<em>path</em>)</td>
+<td>使用 Java 序列化后存储，可以使用 SparkContext.objectFile() 进行加载。(目前仅支持 Java and Scala)</td>
+</tr>
+<tr>
+<td><strong>countByKey</strong>()</td>
+<td>计算每个键出现的次数。</td>
+</tr>
+<tr>
+<td><strong>foreach</strong>(<em>func</em>)</td>
+<td>遍历 RDD 中每个元素，并对其执行_fun_函数</td>
+</tr>
+</tbody></table>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-25</span><i class="fa fa-tag"></i><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2022/01/25/spark-learn-3/,Eisuto,Spark 学习（3）：常用算子,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/01/26/spark-learn-4/" title="Spark 学习（4）：累加器与广播变量">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/25/spark-learn-2/" title="Spark 学习（2）：RDD">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@latest/dist/Valine.min.js"></script><script>var valine = new Valine({
+  el:'#vcomments',
+  notify:false || false, 
+  verify:false|| false, 
+  app_id:'',
+  app_key:'',
+  placeholder:'念念不忘，必有回响...',
+  path: window.location.pathname,
+  serverURLs: '',
+  visitor:true,
+  recordIP:true,
+  avatar:'mp'
+})</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script src="/js/baidu-tongji.js"></script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"left","width":200,"height":500,"hOffset":5,"vOffset":-38},"mobile":{"show":false,"scale":0.2},"react":{"opacityDefault":0.8,"opacityOnHover":0.2},"log":false});</script></body></html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Core"><title>Spark 学习（5）：Spark SQL - DataFrame & Dataset · Eisuto</title><meta name="description" content="一、Spark SQL 简介Spark SQL 是 Spark 中的一个子模块，主要用于操作结构化数据。它具有以下特点：
+
+能够将 SQL 查询与 Spark 程序无缝混合，允许您使用 SQL 或 DataFrame API 对结构化数据进行查询；
+支持多种开发语言；
+支持多达上百种的外部数据源，包"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo.png" style="width:127px;"><h3 title=""><a href="/">Eisuto</a></h3><div class="description"><p>時雨終盡，愛文於葉。</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/eisuto"><i class="fa fa-github"></i></a></li><li><a href="mailto:eisuto@qq.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><!--.p--><!--  span © #{theme.copyright}--><!--  i.fa.fa-star--><!--  span  #{theme.author}--><div class="by_farbox"><span>Powered by</span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo</a><span> &</span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core</a></div><!--.beian--><!--  a(href="http://www.beian.miit.gov.cn/", target="_blank") #{theme.beian}--><!--  span(style="height:10px;margin-left: 10px;") |--><!--  img(src = url_for('images/gongan.png'), style="height:10px;margin-left: 10px;position: relative;top: 1px;")--><!--  span(style="margin-left: 2px;") #{theme.gongan}--></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/tags">标签</a></li><li><a href="/about">关于</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spark 学习（5）：Spark SQL - DataFrame &amp; Dataset</a></h3></div><div class="post-content"><h1 id="一、Spark-SQL-简介"><a href="#一、Spark-SQL-简介" class="headerlink" title="一、Spark SQL 简介"></a>一、Spark SQL 简介</h1><p>Spark SQL 是 Spark 中的一个子模块，主要用于操作结构化数据。它具有以下特点：</p>
+<ul>
+<li>能够将 SQL 查询与 Spark 程序无缝混合，允许您使用 SQL 或 DataFrame API 对结构化数据进行查询；</li>
+<li>支持多种开发语言；</li>
+<li>支持多达上百种的外部数据源，包括 Hive，Avro，Parquet，ORC，JSON 和 JDBC 等；</li>
+<li>支持 HiveQL 语法以及 Hive SerDes 和 UDF，允许你访问现有的 Hive 仓库；</li>
+<li>支持标准的 JDBC 和 ODBC 连接；</li>
+<li>支持优化器，列式存储和代码生成等特性；</li>
+<li>支持扩展并能保证容错。</li>
+</ul>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyr7zxqha3j30k906t76i.jpg" alt="image.png"></p>
+<h1 id="二、DataFrame"><a href="#二、DataFrame" class="headerlink" title="二、DataFrame"></a>二、DataFrame</h1><p>为了支持结构化数据的处理，Spark SQL 提供了新的数据结构 DataFrame。DataFrame 是一个由具名列组成的数据集。可以理解为数据库中的表。由于 Spark SQL 支持多种语言的开发，所以每种语言都定义了 DataFrame 的抽象，主要如下：</p>
+<blockquote>
+<p>DataFrame 被标记为 Untyped API，而 DataSet 被标记为 Typed API ，见下文解释</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th><strong>语言</strong></th>
+<th><strong>主要抽象</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scala</td>
+<td>Dataset[T] &amp; DataFrame (Dataset[Row] 的别名)</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>Dataset[T]</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>DataFrame</td>
+</tr>
+<tr>
+<td>R</td>
+<td>DataFrame</td>
+</tr>
+</tbody></table>
+<h2 id="2-1-对比-RDDs"><a href="#2-1-对比-RDDs" class="headerlink" title="2.1 对比 RDDs"></a>2.1 对比 RDDs</h2><p>从名字上我们也能知道，DataFrame 面向机构化数据，而RDD面向非结构化数据。  </p>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyr7zlcstij30go08sq5r.jpg" alt="image.png"></p>
+<h1 id="三、DataSet"><a href="#三、DataSet" class="headerlink" title="三、DataSet"></a>三、DataSet</h1><p>Dataset 也是分布式的数据集合，在 Spark 1.6 版本被引入，它集成了 RDD 和 DataFrame 的优点，具备强类型的特点，同时支持 Lambda 函数，但只能在 Scala 和 Java 语言中使用。<br>在 Spark 2.0 后，为了方便开发者，Spark 将 DataFrame 和 Dataset 的 API 融合到一起，提供了结构化的 API (<strong>Structured API</strong>)，即用户可以通过一套标准的 API 就能完成对两者的操作</p>
+<h2 id="3-1-静态类型与运行时类型安全"><a href="#3-1-静态类型与运行时类型安全" class="headerlink" title="3.1 静态类型与运行时类型安全"></a>3.1 静态类型与运行时类型安全</h2><p>静态类型 (Static-typing) 与运行时类型安全 (runtime type-safety) 主要表现如下:</p>
+<ul>
+<li>在实际使用中，如果你用的是 Spark SQL 的查询语句，则直到运行时你才会发现有语法错误。</li>
+<li>而如果你用的是 DataFrame 和 Dataset，则在编译时就可以发现错误 。</li>
+</ul>
+<p>DataFrame 和 Dataset 主要区别在于：</p>
+<ul>
+<li>在 DataFrame 中，当你调用了 API 之外的函数，编译器就会报错，但如果你使用了一个不存在的字段名字，编译器依然无法发现。</li>
+<li>而 Dataset 的 API 都是用 Lambda 函数和 JVM 类型对象表示的，所有不匹配的类型参数在编译时就会被发现。</li>
+</ul>
+<p>我们可以通过以上表现，画出一张<strong>类型安全图谱</strong>：  </p>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gyr801nhsaj31e40l0qaz.jpg" alt="image.png"></p>
+<blockquote>
+<p>Dataset 虽然最严格，但是对开发者来说效率最高</p>
+</blockquote>
+<h2 id="3-2-Typed-amp-Untyped"><a href="#3-2-Typed-amp-Untyped" class="headerlink" title="3.2 Typed &amp; Untyped"></a>3.2 Typed &amp; Untyped</h2><p>上面提到过， DataFrame API 被标记为 <code>Untyped API</code>，而 DataSet API 被标记为 <code>Typed API</code></p>
+<ul>
+<li><p>对于语言或 API 而言，虽然 DataFrame 的列类型都是确定的，但是其信息是由 Spark维护的，<strong>只会在运行时检查这些类型与指定类型是否一致</strong>。所以在 Spark 2.0 之后，官方推荐把 DataFrame 看做是 DatSet[Row]，Row 是 Spark 中定义的一个 trait，其子类中封装了列字段的信息。</p>
+</li>
+<li><p>DataSet 的类型<strong>由 Case Class(Scala) 或者 Java Bean(Java) 来明确指定的</strong>，在这里即每一行数据代表一个 Person，这些信息由 JVM 来保证正确性，所以字段名错误和类型错误在编译的时候就会被 IDE 所发现。</p>
+<h1 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h1></li>
+<li><p>RDDs 适合非结构化数据的处理，而 DataFrame &amp; DataSet 更适合结构化数据和半结构化的处理；</p>
+</li>
+<li><p>DataFrame &amp; DataSet 可以通过统一的 Structured API 进行访问，而 RDDs 则更适合函数式编程的场景；</p>
+</li>
+<li><p>相比于 DataFrame 而言，DataSet 是强类型的 (Typed)，有着更为严格的静态类型检查；</p>
+</li>
+<li><p>DataSets、DataFrames、SQL 的底层都依赖了 RDDs API，并对外提供结构化的访问接口。</p>
+<h1 id="五、Spark-SQL的运行原理"><a href="#五、Spark-SQL的运行原理" class="headerlink" title="五、Spark SQL的运行原理"></a>五、Spark SQL的运行原理</h1><p>DataFrame、DataSet 和 Spark SQL 的实际执行流程都是相同的：</p>
+</li>
+</ul>
+<ol>
+<li>进行 DataFrame/Dataset/SQL 编程；</li>
+<li>如果是有效的代码，即代码没有编译错误，Spark 会将其转换为一个逻辑计划；</li>
+<li>Spark 将此逻辑计划转换为物理计划，同时进行代码优化；</li>
+<li>Spark 然后在集群上执行这个物理计划 (基于 RDD 操作) 。<h3 id="5-1-逻辑计划-Logical-Plan"><a href="#5-1-逻辑计划-Logical-Plan" class="headerlink" title="5.1 逻辑计划(Logical Plan)"></a>5.1 逻辑计划(Logical Plan)</h3>执行的第一个阶段是将用户代码转换成一个逻辑计划。它首先将用户代码转换成 unresolved logical plan(未解决的逻辑计划)，之所以这个计划是未解决的，是因为尽管您的代码在语法上是正确的，但是它引用的表或列可能不存在。 Spark 使用 analyzer(分析器) 基于 catalog(存储的所有表和 DataFrames 的信息) 进行解析。解析失败则拒绝执行，解析成功则将结果传给 Catalyst 优化器 (Catalyst Optimizer)，优化器是一组规则的集合，用于优化逻辑计划，通过谓词下推等方式进行优化，最终输出优化后的逻辑执行计划。</li>
+</ol>
+<h3 id="5-2-物理计划-Physical-Plan"><a href="#5-2-物理计划-Physical-Plan" class="headerlink" title="5.2 物理计划(Physical Plan)"></a>5.2 物理计划(Physical Plan)</h3><p>得到优化后的逻辑计划后，Spark 就开始了物理计划过程。 它通过生成不同的物理执行策略，并通过成本模型来比较它们，从而选择一个最优的物理计划在集群上面执行的。物理规划的输出结果是一系列的 RDDs 和转换关系 (transformations)。</p>
+<h3 id="5-3-执行"><a href="#5-3-执行" class="headerlink" title="5.3 执行"></a>5.3 执行</h3><p>在选择一个物理计划后，Spark 运行其 RDDs 代码，并在运行时执行进一步的优化，生成本地 Java 字节码，最后将运行结果返回给用户。</p>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-26</span><i class="fa fa-tag"></i><a class="tag" href="/tags/spark/" title="spark">spark </a><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2022/01/26/spark-learn-5/,Eisuto,Spark 学习（5）：Spark SQL - DataFrame &amp; Dataset,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/07/22/es-1-data-sync/" title="ES 学习（1）：使用 logstach 将 mysql 数据导入到 elasticSearch 中">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/26/spark-learn-4/" title="Spark 学习（4）：累加器与广播变量">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@latest/dist/Valine.min.js"></script><script>var valine = new Valine({
+  el:'#vcomments',
+  notify:false || false, 
+  verify:false|| false, 
+  app_id:'',
+  app_key:'',
+  placeholder:'念念不忘，必有回响...',
+  path: window.location.pathname,
+  serverURLs: '',
+  visitor:true,
+  recordIP:true,
+  avatar:'mp'
+})</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script src="/js/baidu-tongji.js"></script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"left","width":200,"height":500,"hOffset":5,"vOffset":-38},"mobile":{"show":false,"scale":0.2},"react":{"opacityDefault":0.8,"opacityOnHover":0.2},"log":false});</script></body></html>

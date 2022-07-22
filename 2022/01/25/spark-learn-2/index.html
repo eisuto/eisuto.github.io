@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="Core"><title>Spark 学习（2）：RDD · Eisuto</title><meta name="description" content="一、简介RDD 全称为 Resilient Distributed Datasets，是 Spark 最基本的数据抽象，它是只读的、分区记录的集合，支持并行操作，可以由外部数据集或其他 RDD 转换而来，它具有以下特性：
+
+分区（Partitions），一个 RDD 由一个或者多个分区组成。每个分区"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="/js/jquery.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo.png" style="width:127px;"><h3 title=""><a href="/">Eisuto</a></h3><div class="description"><p>時雨終盡，愛文於葉。</p></div></div></div><ul class="social-links"><li><a target="_blank" rel="noopener" href="https://github.com/eisuto"><i class="fa fa-github"></i></a></li><li><a href="mailto:eisuto@qq.com"><i class="fa fa-envelope"></i></a></li></ul><div class="footer"><!--.p--><!--  span © #{theme.copyright}--><!--  i.fa.fa-star--><!--  span  #{theme.author}--><div class="by_farbox"><span>Powered by</span><a href="https://hexo.io/zh-cn/" target="_blank">Hexo</a><span> &</span><a href="https://github.com/mrcore/hexo-theme-Anatole-Core" target="_blank">Anatole-Core</a></div><!--.beian--><!--  a(href="http://www.beian.miit.gov.cn/", target="_blank") #{theme.beian}--><!--  span(style="height:10px;margin-left: 10px;") |--><!--  img(src = url_for('images/gongan.png'), style="height:10px;margin-left: 10px;position: relative;top: 1px;")--><!--  span(style="margin-left: 2px;") #{theme.gongan}--></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/archives">归档</a></li><li><a href="/tags">标签</a></li><li><a href="/about">关于</a></li><li><a href="/guestbook">留言</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Spark 学习（2）：RDD</a></h3></div><div class="post-content"><h1 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h1><p>RDD 全称为 Resilient Distributed Datasets，是 Spark 最基本的数据抽象，它是只读的、分区记录的集合，支持并行操作，可以由外部数据集或其他 RDD 转换而来，它具有以下特性：</p>
+<ul>
+<li><strong>分区</strong>（Partitions），一个 RDD 由一个或者多个分区组成。<strong>每个分区会被一个计算任务</strong>所处理，用户可以在创建 RDD 时指定其分区个数，如果没有指定，则默认采用程序所分配到的 CPU 的核心数</li>
+<li><strong>分区函数</strong></li>
+<li><strong>依赖关系</strong>，RDD 会保存彼此间的依赖关系，RDD 的每次转换都会生成一个新的依赖关系，这种 RDD 之间的依赖关系就像流水线一样。在部分分区数据丢失后，可以通过这种依赖关系重新计算丢失的分区数据，而不是对 RDD 的所有分区进行重新计算；</li>
+<li><strong>分区器</strong>（Partitioner）Key-Value 型的 RDD 还拥有 Partitioner 分区器，用于决定数据被存储在哪个分区中，目前 Spark 中支持HashPartitioner（按照哈希分区)）和 RangeParationer（按照范围进行分区）</li>
+<li><strong>优先位置列表</strong>，它保存了每个分区的优先位置 (prefered location)。对于一个 HDFS 文件来说，这个列表保存的就是每个分区所在的块的位置，按照“<strong>移动数据不如移动计算</strong>”的理念，Spark 在进行任务调度的时候，会尽可能的将计算任务分配到其所要处理数据块的存储位置。    </li>
+</ul>
+<h1 id="二、创建-RDD"><a href="#二、创建-RDD" class="headerlink" title="二、创建 RDD"></a>二、创建 RDD</h1><p>RDD 有两种创建方式，分别如下：</p>
+<h2 id="2-1-通过现有集合创建"><a href="#2-1-通过现有集合创建" class="headerlink" title="2.1 通过现有集合创建"></a>2.1 通过现有集合创建</h2><p>使用 <code>spark-shell</code>  以本地模式启动 Spark</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spark-shell --master local[5]</span><br><span class="line">// 相当于</span><br><span class="line">val conf = new SparkConf().setAppName(&quot;test&quot;).setMaster(&quot;local[5]&quot;)</span><br><span class="line">val sc = new SparkContext(conf)</span><br></pre></td></tr></table></figure>
+<p>通过现有集合创建</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="type">Array</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>)</span><br><span class="line"><span class="comment">// 通过集合创建</span></span><br><span class="line"><span class="keyword">val</span> dataRDD = sc.parallelize(data) </span><br><span class="line"><span class="comment">// 查看分区数</span></span><br><span class="line">dataRDD.getNumPartitions</span><br><span class="line"><span class="comment">// 指定分区数</span></span><br><span class="line"><span class="keyword">val</span> dataRDD = sc.parallelize(data,<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>结果如下：<br><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gypzv61vmlj30ru06idl3.jpg" alt="image.png"></p>
+<h2 id="2-2-通过外部存储创建"><a href="#2-2-通过外部存储创建" class="headerlink" title="2.2 通过外部存储创建"></a>2.2 通过外部存储创建</h2><p>可以使用本地文件系统，HBase ，HDFS以及支持 Hadoop InputFormat 的任何数据源。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fileRDD = sc.textFile(<span class="string">&quot;/usr/test_data/data.txt&quot;</span>)</span><br><span class="line">fileRDD.take(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：如果在集群环境下从本地文件系统读取数据，则要求该文件必须在集群中所有机器上都存在，且路径相同。</p>
+</blockquote>
+<h1 id="三、操作-RDD"><a href="#三、操作-RDD" class="headerlink" title="三、操作 RDD"></a>三、操作 RDD</h1><p>RDD 支持两种操作：</p>
+<ol>
+<li>_transformations_（转换，从现有数据集创建新数据集）</li>
+<li>_actions_（在数据集上运行计算后将值返回到驱动程序）</li>
+</ol>
+<p>RDD 中的所有转换操作都是惰性的，它们只是记住这些转换操作，但不会立即执行，只有遇到 <em>action</em> 操作后才会真正的进行计算，这类似于函数式编程中的惰性求值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">scala&gt;</span><span class="bash"> val list = List(1,2,3)</span></span><br><span class="line">list: List[Int] = List(1, 2, 3)</span><br><span class="line"></span><br><span class="line">// map 是一个 transformations 操作，foreach 则是一个 actions 操作</span><br><span class="line"><span class="meta">scala&gt;</span><span class="bash"> sc.parallelize(list).map(_ * 10).foreach(println)</span></span><br><span class="line">30 tage 0:&gt;                                                          (0 + 6) / 6]</span><br><span class="line">20</span><br><span class="line">10</span><br></pre></td></tr></table></figure>
+<h1 id="四、缓存-RDD"><a href="#四、缓存-RDD" class="headerlink" title="四、缓存 RDD"></a>四、缓存 RDD</h1><h2 id="4-1-缓存级别"><a href="#4-1-缓存级别" class="headerlink" title="4.1 缓存级别"></a>4.1 缓存级别</h2><p>Spark 的速度很快的一个原因是支持缓存，缓存RDD后，如果之后的操作使用了此RDD，则直接从缓存中获取。如果缓存丢失，则通过RDD之间的依赖关系，重新计算丢失分区的数据即可。<br>Spark 支持多种缓存级别：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Storage Level（存储级别）</strong></th>
+<th><strong>Meaning（含义）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MEMORY_ONLY</td>
+<td>默认的缓存级别，将 RDD 以反序列化的 Java 对象的形式存储在 JVM 中。如果内存空间不够，则部分分区数据将不再缓存。</td>
+</tr>
+<tr>
+<td>MEMORY_AND_DISK</td>
+<td>将 RDD 以反序列化的 Java 对象的形式存储 JVM 中。如果内存空间不够，将未缓存的分区数据存储到磁盘，在需要使用这些分区时从磁盘读取。</td>
+</tr>
+<tr>
+<td>MEMORY_ONLY_SER</td>
+<td>将 RDD 以序列化的 Java 对象的形式进行存储（每个分区为一个 byte 数组）。这种方式比反序列化对象节省存储空间，但在读取时会增加 CPU 的计算负担。仅支持 Java 和 Scala 。</td>
+</tr>
+<tr>
+<td>MEMORY_AND_DISK_SER</td>
+<td>类似于 MEMORY_ONLY_SER，但是溢出的分区数据会存储到磁盘，而不是在用到它们时重新计算。仅支持 Java 和 Scala。</td>
+</tr>
+<tr>
+<td>DISK_ONLY</td>
+<td>只在磁盘上缓存 RDD</td>
+</tr>
+<tr>
+<td>MEMORY_ONLY_2 MEMORY_AND_DISK_2, etc</td>
+<td>与上面的对应级别功能相同，但是会为每个分区在集群中的两个节点上建立副本。</td>
+</tr>
+<tr>
+<td>OFF_HEAP</td>
+<td>与 MEMORY_ONLY_SER 类似，但将数据存储在堆外内存中。这需要启用堆外内存。</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-使用缓存"><a href="#4-2-使用缓存" class="headerlink" title="4.2 使用缓存"></a>4.2 使用缓存</h2><p>缓存数据有两种方式：</p>
+<ol>
+<li>persist</li>
+<li>cache</li>
+</ol>
+<p>cache 是 persist 的一种特殊形式，等价于 <code>persist(StorageLevel.MEMORY_ONLY)</code>，例如：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 存储级别均定义在 StorageLevel 对象中</span></span><br><span class="line">fileRDD.persist(<span class="type">StorageLevel</span>.<span class="type">MEMORY_AND_DISK</span>)</span><br><span class="line">fileRDD.cache()</span><br></pre></td></tr></table></figure>
+<h2 id="4-3-删除缓存"><a href="#4-3-删除缓存" class="headerlink" title="4.3 删除缓存"></a>4.3 删除缓存</h2><p>Spark 会自动监视每个节点上的缓存使用情况，并按照最近最少使用（LRU）的规则删除旧数据分区。也可以使用 <code>RDD.unpersist()</code> 方法进行手动删除。</p>
+<h1 id="五、Shuffle"><a href="#五、Shuffle" class="headerlink" title="五、Shuffle"></a>五、Shuffle</h1><p>在 Spark 中，个任务对应一个分区，通常不会跨分区操作数据。但如果遇到 reduceByKey 等操作，Spark 必须从所有分区读取数据，并查找所有键的所有值，然后汇总在一起以计算每个键的最终结果 ，这称为 Shuffle。<br><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gypzvvs6ujj31c50ynqij.jpg" alt="image.png"><br><strong>Shuffle 是一项昂贵的操作</strong>，因为它通常会跨节点操作数据，这会涉及磁盘 I/O，网络 I/O，和数据序列化。某些 Shuffle 操作还会消耗大量的堆内存，因为它们使用堆内存来临时存储需要网络传输的数据。Shuffle 还会在磁盘上生成大量中间文件，从 Spark 1.3 开始，这些文件将被保留，直到相应的 RDD 不再使用并进行垃圾回收，这样做是为了避免在计算时重复创建 Shuffle 文件。如果应用程序长期保留对这些 RDD 的引用，则垃圾回收可能在很长一段时间后才会发生，这意味着长时间运行的 Spark 作业可能会占用大量磁盘空间，通常可以使用 spark.local.dir 参数来指定这些临时文件的存储目录。<br>由于 Shuffle 操作对性能的影响比较大，所以需要特别注意使用，以下操作都会导致 Shuffle：</p>
+<ul>
+<li><p><strong>涉及到重新分区操作</strong>： 如 repartition 和 coalesce；</p>
+</li>
+<li><p><strong>所有涉及到 ByKey 的操作</strong>：如 groupByKey 和 reduceByKey，但 countByKey 除外；</p>
+</li>
+<li><p><strong>联结操作</strong>：如 cogroup 和 join；</p>
+<h1 id="六、宽依赖和窄依赖"><a href="#六、宽依赖和窄依赖" class="headerlink" title="六、宽依赖和窄依赖"></a>六、宽依赖和窄依赖</h1><p>RDD 和它的父 RDD(s) 之间的依赖关系分为两种不同的类型：</p>
+</li>
+<li><p>**窄依赖 (narrow dependency)**：父 RDDs 的一个分区最多被子 RDDs 一个分区所依赖；</p>
+</li>
+<li><p>**宽依赖 (wide dependency)**：父 RDDs 的一个分区可以被子 RDDs 的多个子分区所依赖。</p>
+</li>
+</ul>
+<p><img src="https://tva1.sinaimg.cn/large/005Rbifqly1gypzw6ct73j30p40giqb1.jpg" alt="image.png"><br><strong>两种依赖对比：</strong>  </p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>窄依赖</strong></th>
+<th><strong>宽依赖</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>计算方式</td>
+<td>父分区流水线方式</td>
+<td>父分区全部计算后 Shuffle</td>
+</tr>
+<tr>
+<td>数据恢复</td>
+<td>重新对丢失分区的父分区进行计算</td>
+<td>所有父分区数据进行计算并再次 Shuffle</td>
+</tr>
+</tbody></table>
+<p>窄依赖允许在一个集群节点上以流水线的方式（pipeline）对父分区数据进行计算，例如先执行 map 操作，然后执行 filter 操作。<br>而宽依赖则需要计算好所有父分区的数据，然后再在节点之间进行 Shuffle，这与 MapReduce 类似。</p>
+<h1 id="七、DAG"><a href="#七、DAG" class="headerlink" title="七、DAG"></a>七、DAG</h1><p>RDD(s) 及其之间的依赖关系组成了** DAG**（有向无环图），DAG 定义了这些 RDD(s) 之间的 Lineage(血统) 关系，通过血统关系，如果一个 RDD 的部分或者全部计算结果丢失了，也可以重新进行计算。那么 Spark 是如何根据 DAG 来生成计算任务呢？主要是根据依赖关系的不同将 DAG 划分为不同的计算阶段 (Stage)：</p>
+<ul>
+<li>对于窄依赖，由于分区的依赖关系是确定的，其转换操作可以在同一个线程执行，所以可以划分到同一个执行阶段；</li>
+<li>对于宽依赖，由于 Shuffle 的存在，只能在父 RDD(s) 被 Shuffle 处理完成后，才能开始接下来的计算，因此遇到宽依赖就需要重新划分阶段。</li>
+</ul>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2022-01-25</span><i class="fa fa-tag"></i><a class="tag" href="/tags/spark/" title="spark">spark </a><span class="leancloud_visitors"></span></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="" onclick="javascript:join_favorite()" ref="sidebar"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,http://example.com/2022/01/25/spark-learn-2/,Eisuto,Spark 学习（2）：RDD,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2022/01/25/spark-learn-3/" title="Spark 学习（3）：常用算子">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2022/01/24/spark-learn-1/" title="Spark 学习（1）：久闻大名">下一篇</a></li></ul></div><script src="/js/visitors.js"></script><a id="comments"></a><div id="vcomments" style="margin:0 30px;"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/gh/xcss/valine@latest/dist/Valine.min.js"></script><script>var valine = new Valine({
+  el:'#vcomments',
+  notify:false || false, 
+  verify:false|| false, 
+  app_id:'',
+  app_key:'',
+  placeholder:'念念不忘，必有回响...',
+  path: window.location.pathname,
+  serverURLs: '',
+  visitor:true,
+  recordIP:true,
+  avatar:'mp'
+})</script></div></div></div></div><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/add-bookmark.js"></script><script src="/js/baidu-tongji.js"></script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"left","width":200,"height":500,"hOffset":5,"vOffset":-38},"mobile":{"show":false,"scale":0.2},"react":{"opacityDefault":0.8,"opacityOnHover":0.2},"log":false});</script></body></html>
